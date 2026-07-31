@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model PrimaryCategory {
+  id                  String              @id
+  subject             String
+  name                String
+  sortOrder           Int                 @default(0)
+  isActive            Boolean             @default(true)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  secondaryCategories SecondaryCategory[]
+  records             PracticeRecord[]    @relation("RecordPrimaryCategory")
+
+  @@unique([subject, name])
+  @@index([subject, isActive, sortOrder])
+}
+
+model SecondaryCategory {
+  id                String           @id
+  primaryCategoryId String
+  name              String
+  sortOrder         Int              @default(0)
+  isActive          Boolean          @default(true)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  primaryCategory   PrimaryCategory  @relation(fields: [primaryCategoryId], references: [id], onDelete: Restrict)
+  records           PracticeRecord[] @relation("RecordSecondaryCategory")
+
+  @@unique([primaryCategoryId, name])
+  @@index([primaryCategoryId, isActive, sortOrder])
+}
+
+model PracticeRecord {
+  id                  String             @id @default(cuid())
+  ownerKey            String             @default("single-user")
+  date                String
+  examType            String
+  subject             String
+  primaryCategoryId   String
+  secondaryCategoryId String?
+  totalQuestions      Int
+  correctQuestions    Int
+  durationMinutes     Int                @default(0)
+  source              String?
+  notes               String?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  primaryCategory     PrimaryCategory    @relation("RecordPrimaryCategory", fields: [primaryCategoryId], references: [id], onDelete: Restrict)
+  secondaryCategory   SecondaryCategory? @relation("RecordSecondaryCategory", fields: [secondaryCategoryId], references: [id], onDelete: Restrict)
+
+  @@index([ownerKey, date])
+  @@index([ownerKey, examType, date])
+  @@index([ownerKey, subject, date])
+  @@index([ownerKey, primaryCategoryId, date])
+  @@index([ownerKey, secondaryCategoryId, date])
+}
