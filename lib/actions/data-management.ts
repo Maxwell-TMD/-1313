@@ -11,6 +11,7 @@ function revalidateStatistics() {
   revalidatePath("/");
   revalidatePath("/records");
   revalidatePath("/analytics");
+  revalidatePath("/papers");
   revalidatePath("/settings");
 }
 
@@ -29,7 +30,10 @@ export async function replaceAllDataAction(serialized: string): Promise<DataActi
   try {
     await replaceAllData(parsed.data);
     revalidateStatistics();
-    return { success: true, message: `已恢复 ${parsed.data.records.length} 条记录` };
+    return {
+      success: true,
+      message: `已恢复 ${parsed.data.records.length} 条练习和 ${parsed.data.papers.length} 张试卷`,
+    };
   } catch {
     return { success: false, message: "恢复失败，原有数据未被修改" };
   }
@@ -39,7 +43,10 @@ export async function clearAllDataAction(confirmation: string): Promise<DataActi
   if (confirmation !== "清空全部数据") {
     return { success: false, message: "确认文字不正确" };
   }
-  await prisma.practiceRecord.deleteMany({ where: { ownerKey: "single-user" } });
+  await prisma.$transaction([
+    prisma.paper.deleteMany({ where: { ownerKey: "single-user" } }),
+    prisma.practiceRecord.deleteMany({ where: { ownerKey: "single-user" } }),
+  ]);
   revalidateStatistics();
-  return { success: true, message: "全部练习记录已清空" };
+  return { success: true, message: "全部练习记录和试卷已清空" };
 }

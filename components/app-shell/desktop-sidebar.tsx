@@ -26,7 +26,11 @@ export function DesktopSidebar() {
           const active =
             item.href === "/"
               ? pathname === "/"
-              : pathname.startsWith(item.href);
+              : item.href === "/records/new"
+                ? pathname === "/records/new"
+                : item.href === "/records"
+                  ? pathname.startsWith("/records") && pathname !== "/records/new"
+                  : pathname.startsWith(item.href);
           const Icon = item.icon;
           return (
             <Link

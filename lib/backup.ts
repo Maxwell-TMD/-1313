@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db/prisma";
 import type { BackupPayload } from "@/lib/validation/backup";
 
 export async function createBackupPayload(): Promise<BackupPayload> {
-  const [categories, records] = await Promise.all([
+  const [categories, records, papers] = await Promise.all([
     prisma.primaryCategory.findMany({
       include: { secondaryCategories: { orderBy: { sortOrder: "asc" } } },
       orderBy: [{ subject: "desc" }, { sortOrder: "asc" }],
@@ -11,10 +11,15 @@ export async function createBackupPayload(): Promise<BackupPayload> {
       where: { ownerKey: "single-user" },
       orderBy: [{ date: "desc" }, { createdAt: "desc" }],
     }),
+    prisma.paper.findMany({
+      where: { ownerKey: "single-user" },
+      include: { moduleResults: true },
+      orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+    }),
   ]);
 
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     exportedAt: new Date().toISOString(),
     categories: categories.map((category) => ({
       id: category.id,
@@ -44,11 +49,30 @@ export async function createBackupPayload(): Promise<BackupPayload> {
       createdAt: record.createdAt.toISOString(),
       updatedAt: record.updatedAt.toISOString(),
     })),
+    papers: papers.map((paper) => ({
+      id: paper.id,
+      date: paper.date,
+      name: paper.name,
+      examType: paper.examType as "国考" | "省考" | "事业单位" | "其他",
+      notes: paper.notes,
+      createdAt: paper.createdAt.toISOString(),
+      updatedAt: paper.updatedAt.toISOString(),
+      moduleResults: paper.moduleResults.map((result) => ({
+        id: result.id,
+        primaryCategoryId: result.primaryCategoryId,
+        totalQuestions: result.totalQuestions,
+        correctQuestions: result.correctQuestions,
+        score: result.score,
+        createdAt: result.createdAt.toISOString(),
+        updatedAt: result.updatedAt.toISOString(),
+      })),
+    })),
   };
 }
 
 export async function replaceAllData(backup: BackupPayload) {
   await prisma.$transaction(async (transaction) => {
+    await transaction.paper.deleteMany({ where: { ownerKey: "single-user" } });
     await transaction.practiceRecord.deleteMany({ where: { ownerKey: "single-user" } });
     await transaction.secondaryCategory.deleteMany();
     await transaction.primaryCategory.deleteMany();
@@ -80,6 +104,32 @@ export async function replaceAllData(backup: BackupPayload) {
           ownerKey: "single-user",
           createdAt: new Date(record.createdAt),
           updatedAt: new Date(record.updatedAt),
+        },
+      });
+    }
+
+    for (const paper of backup.papers) {
+      await transaction.paper.create({
+        data: {
+          id: paper.id,
+          ownerKey: "single-user",
+          date: paper.date,
+          name: paper.name,
+          examType: paper.examType,
+          notes: paper.notes,
+          createdAt: new Date(paper.createdAt),
+          updatedAt: new Date(paper.updatedAt),
+          moduleResults: {
+            create: paper.moduleResults.map((result) => ({
+              id: result.id,
+              primaryCategoryId: result.primaryCategoryId,
+              totalQuestions: result.totalQuestions,
+              correctQuestions: result.correctQuestions,
+              score: result.score,
+              createdAt: new Date(result.createdAt),
+              updatedAt: new Date(result.updatedAt),
+            })),
+          },
         },
       });
     }

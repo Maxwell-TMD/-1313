@@ -11,7 +11,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { CategoryIcon } from "@/components/records/category-icon";
 
 type CategoryWithChildren = PrimaryCategory & {
   secondaryCategories: SecondaryCategory[];
@@ -57,11 +65,15 @@ export function RecordForm({
   const [primaryCategoryId, setPrimaryCategoryId] = useState(
     initialValues?.primaryCategoryId ?? "",
   );
+  const [secondaryCategoryId, setSecondaryCategoryId] = useState(
+    initialValues?.secondaryCategoryId ?? "",
+  );
 
   useEffect(() => {
     if (state.values) {
       setSubject(state.values.subject ?? "行测");
       setPrimaryCategoryId(state.values.primaryCategoryId ?? "");
+      setSecondaryCategoryId(state.values.secondaryCategoryId ?? "");
     }
   }, [state.attemptId, state.values]);
 
@@ -104,6 +116,7 @@ export function RecordForm({
                 onChange={(event) => {
                   setSubject(event.target.value);
                   setPrimaryCategoryId("");
+                  setSecondaryCategoryId("");
                 }}
               >
                 {SUBJECTS.map((value) => <option key={value}>{value}</option>)}
@@ -112,25 +125,67 @@ export function RecordForm({
             </div>
             <div>
               <Label htmlFor="primaryCategoryId">一级模块</Label>
-              <select
-                id="primaryCategoryId"
+              <Select
                 name="primaryCategoryId"
-                className={`${selectClassName} mt-2`}
                 value={primaryCategoryId}
-                onChange={(event) => setPrimaryCategoryId(event.target.value)}
+                onValueChange={(value) => {
+                  setPrimaryCategoryId(value);
+                  setSecondaryCategoryId("");
+                }}
                 required
               >
-                <option value="">请选择</option>
-                {primaryCategories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
-              </select>
+                <SelectTrigger id="primaryCategoryId" className="mt-2">
+                  <SelectValue placeholder="请选择" />
+                </SelectTrigger>
+                <SelectContent>
+                  {primaryCategories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      <span className="flex min-w-0 items-center gap-2.5">
+                        <CategoryIcon categoryId={category.id} />
+                        <span className="truncate">{category.name}</span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FieldError errors={state.fieldErrors?.primaryCategoryId} />
             </div>
             <div>
               <Label htmlFor="secondaryCategoryId">二级模块（可选）</Label>
-              <select id="secondaryCategoryId" name="secondaryCategoryId" className={`${selectClassName} mt-2`} defaultValue={state.values?.secondaryCategoryId ?? initialValues?.secondaryCategoryId ?? ""} disabled={secondaryCategories.length === 0}>
-                <option value="">{secondaryCategories.length ? "请选择" : "该模块暂无二级分类"}</option>
-                {secondaryCategories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
-              </select>
+              <Select
+                name="secondaryCategoryId"
+                value={secondaryCategoryId}
+                onValueChange={(value) =>
+                  setSecondaryCategoryId(value === "none" ? "" : value)
+                }
+                disabled={secondaryCategories.length === 0}
+              >
+                <SelectTrigger id="secondaryCategoryId" className="mt-2">
+                  <SelectValue
+                    placeholder={
+                      secondaryCategories.length
+                        ? "请选择"
+                        : "该模块暂无二级分类"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">
+                    <span className="flex items-center gap-2.5 text-muted-foreground">
+                      <CategoryIcon categoryId="none" />
+                      不选择二级模块
+                    </span>
+                  </SelectItem>
+                  {secondaryCategories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      <span className="flex min-w-0 items-center gap-2.5">
+                        <CategoryIcon categoryId={category.id} />
+                        <span className="truncate">{category.name}</span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FieldError errors={state.fieldErrors?.secondaryCategoryId} />
             </div>
             <div>

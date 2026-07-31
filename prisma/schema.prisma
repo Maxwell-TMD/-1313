@@ -17,9 +17,41 @@ model PrimaryCategory {
   updatedAt           DateTime            @updatedAt
   secondaryCategories SecondaryCategory[]
   records             PracticeRecord[]    @relation("RecordPrimaryCategory")
+  paperModuleResults  PaperModuleResult[]
 
   @@unique([subject, name])
   @@index([subject, isActive, sortOrder])
+}
+
+model Paper {
+  id            String              @id @default(cuid())
+  ownerKey      String              @default("single-user")
+  date          String
+  name          String
+  examType      String
+  notes         String?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  moduleResults PaperModuleResult[]
+
+  @@index([ownerKey, date])
+  @@index([ownerKey, examType, date])
+}
+
+model PaperModuleResult {
+  id                String          @id @default(cuid())
+  paperId           String
+  primaryCategoryId String
+  totalQuestions    Int
+  correctQuestions  Int
+  score             Float           @default(0)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  paper             Paper            @relation(fields: [paperId], references: [id], onDelete: Cascade)
+  primaryCategory   PrimaryCategory  @relation(fields: [primaryCategoryId], references: [id], onDelete: Restrict)
+
+  @@unique([paperId, primaryCategoryId])
+  @@index([primaryCategoryId])
 }
 
 model SecondaryCategory {
