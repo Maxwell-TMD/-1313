@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>花庭秘仪 · 塔罗</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="deck.js" defer></script>
+  <script src="interpretations.js" defer></script>
+  <script src="records.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-bar">
+      <a class="brand" href="#main" aria-label="花庭秘仪，跳到选牌">
+        <svg viewBox="0 0 40 40" width="38" height="38" fill="none" aria-hidden="true">
+          <circle cx="20" cy="20" r="18.5"/><circle cx="20" cy="20" r="15.5"/>
+          <path d="M20 7c0 8-5 13-13 13 8 0 13 5 13 13 0-8 5-13 13-13-8 0-13-5-13-13Z"/>
+          <circle cx="20" cy="20" r="3"/>
+        </svg>
+        <span>花庭秘仪<small>THE BOTANICAL TAROT</small></span>
+      </a>
+      <div class="site-actions">
+        <span class="local-label"><span></span> 离线牌室</span>
+        <button class="secondary-button" id="preview-button" type="button">牌面图鉴</button>
+        <button class="secondary-button" id="history-button" type="button" aria-haspopup="dialog">历史记录</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="page">
+    <section class="intro" aria-labelledby="page-title">
+      <svg class="intro-ornament" viewBox="0 0 280 125" fill="none" aria-hidden="true">
+        <path d="M4 112c65 0 67-69 126-69 35 0 38 41 12 41-19 0-14-24 2-20M12 117c74 5 86-45 120-45 27 0 29 29 7 36-26 8-29-17-13-19M31 102c26-10 21-36 19-52 22 13 18 29 6 43m18-17c16-14 14-38 33-51 6 23-7 40-21 44m35-24c8-21 24-25 40-28-1 16-14 26-29 27m32 7c16-11 31-9 43 1-13 12-31 9-41 5m15 22c21 2 36 15 36 32-17-4-34-13-36-32Z"/>
+        <path d="M44 111c48 0 72 8 122 3 31-3 59-31 90-25M17 102c-2-17 4-29 19-35 3 12-2 23-12 32m184-22c25 5 35 4 61-7-12 20-44 23-61 7Z"/>
+        <path d="M212 32v22m-11-11h22m-17-6 12 12m0-12-12 12m41 7v14m-7-7h14"/>
+      </svg>
+      <svg class="intro-ornament intro-ornament-right" viewBox="0 0 280 125" fill="none" aria-hidden="true">
+        <path d="M4 112c65 0 67-69 126-69 35 0 38 41 12 41-19 0-14-24 2-20M12 117c74 5 86-45 120-45 27 0 29 29 7 36-26 8-29-17-13-19M31 102c26-10 21-36 19-52 22 13 18 29 6 43m18-17c16-14 14-38 33-51 6 23-7 40-21 44m35-24c8-21 24-25 40-28-1 16-14 26-29 27m32 7c16-11 31-9 43 1-13 12-31 9-41 5m15 22c21 2 36 15 36 32-17-4-34-13-36-32Z"/>
+        <path d="M44 111c48 0 72 8 122 3 31-3 59-31 90-25M17 102c-2-17 4-29 19-35 3 12-2 23-12 32m184-22c25 5 35 4 61-7-12 20-44 23-61 7Z"/>
+        <path d="M212 32v22m-11-11h22m-17-6 12 12m0-12-12 12m41 7v14m-7-7h14"/>
+      </svg>
+      <div class="intro-copy">
+        <p class="eyebrow"><span aria-hidden="true">✧</span> THE THREE-CARD READING <span aria-hidden="true">✧</span></p>
+        <h1 id="page-title">花庭秘仪</h1>
+        <p>先在心里想一个你想探索的问题。<br class="mobile-break">准备好后，从面前的 78 张牌中凭直觉选出 3 张。</p>
+      </div>
+    </section>
+
+    <details class="record-context" id="record-context" open>
+      <summary><strong>本轮记录</strong><span class="record-meta" id="record-summary">选择主题，填写地点与问题</span></summary>
+      <form class="record-form" id="record-form">
+        <label>
+          主题
+          <select name="topic">
+            <option>未分类</option>
+            <option>爱情</option>
+            <option>事业</option>
+            <option>学业</option>
+            <option>财务</option>
+            <option>人际</option>
+            <option>自我成长</option>
+            <option>其他</option>
+          </select>
+        </label>
+        <label>
+          地点
+          <input name="location" type="text" maxlength="80" placeholder="例如 上海">
+        </label>
+        <label>
+          本轮问题
+          <textarea name="question" rows="1" maxlength="500" placeholder="例如 我该怎样理解现在这段关系？"></textarea>
+        </label>
+        <p class="record-note" id="record-note" role="status">翻完第三张牌时自动记录本地日期和时间。</p>
+      </form>
+    </details>
+
+    <div class="reading-layout">
+      <section class="deck-section" aria-labelledby="deck-heading">
+        <div class="section-heading deck-heading">
+          <div>
+            <p class="eyebrow">01 <span aria-hidden="true">/</span> THE DECK</p>
+            <h2 id="deck-heading">选择你的牌</h2>
+          </div>
+          <div class="deck-actions">
+            <span class="selection-count" id="selection-count" aria-label="已选 0 张，共 3 张"><b id="selected-number">0</b> <span>/</span> 3</span>
+            <button class="secondary-button" id="shuffle-button" type="button">
+              <svg viewBox="0 0 20 20" width="17" height="17" fill="none" aria-hidden="true"><path d="M2.5 5.5h3c3.5 0 5 9 8.5 9h3.5m-3-3 3 3-3 3m-12-3h3c3.5 0 5-9 8.5-9h3.5m-3-3 3 3-3 3"/></svg>
+              重新洗牌
+            </button>
+          </div>
+        </div>
+        <div id="deck" class="deck" aria-label="78 张塔罗牌"></div>
+        <p class="deck-caption"><span aria-hidden="true">✧</span> 78 张牌 · 正位与逆位 · 一次三张</p>
+      </section>
+
+      <section class="reading-panel" id="reading" aria-labelledby="reading-heading">
+        <div class="section-heading reading-heading">
+          <div>
+            <p class="eyebrow">02 <span aria-hidden="true">/</span> THE READING</p>
+            <h2 id="reading-heading" tabindex="-1">本轮解读</h2>
+          </div>
+          <span class="heading-star" aria-hidden="true">✧</span>
+        </div>
+        <div class="reading-progress" id="reading-progress" aria-hidden="true">
+          <span>I</span><span>II</span><span>III</span>
+        </div>
+        <div id="empty-reading" class="empty-reading">
+          <svg viewBox="0 0 128 105" fill="none" aria-hidden="true">
+            <rect x="18" y="27" width="43" height="64" rx="4" transform="rotate(-16 18 27)"/>
+            <rect x="68" y="15" width="43" height="64" rx="4" transform="rotate(16 68 15)"/>
+            <rect class="empty-card-front" x="42" y="14" width="44" height="68" rx="4"/>
+            <rect x="46" y="18" width="36" height="60" rx="2"/>
+            <path d="M64 27c0 13-6 21-15 21 9 0 15 8 15 21 0-13 6-21 15-21-9 0-15-8-15-21Z"/>
+            <circle cx="64" cy="48" r="4"/><path d="M13 11v10m-5-5h10m102 68v10m-5-5h10m-26-81v8m-4-4h8"/>
+          </svg>
+          <h3>等你翻开第一张牌</h3>
+          <p>每翻一张，这里都会显示<br>它的牌名、方向和含义。</p>
+        </div>
+        <ol class="reading-list" id="reading-list" aria-label="已翻开的牌"></ol>
+      </section>
+    </div>
+
+    <p class="visually-hidden" id="announcement" role="status" aria-live="polite"></p>
+    <a class="mobile-results" id="mobile-results" href="#reading" hidden>查看牌义 <span aria-hidden="true">↓</span></a>
+    <noscript><p class="noscript">请在浏览器中启用 JavaScript 来洗牌和查看牌义。</p></noscript>
+  </main>
+
+  <dialog class="preview-dialog" id="preview-dialog" aria-labelledby="preview-heading">
+    <div class="dialog-heading">
+      <div>
+        <p class="eyebrow">THE ART OF THE DECK</p>
+        <h2 id="preview-heading">牌面图鉴</h2>
+      </div>
+      <form method="dialog"><button class="close-button" type="submit" aria-label="关闭牌面图鉴" autofocus>×</button></form>
+    </div>
+    <p class="preview-intro">按牌组查看 78 张牌的正面插画与通用牌背。</p>
+    <div id="preview-content"></div>
+  </dialog>
+
+  <dialog class="preview-dialog" id="history-dialog" aria-labelledby="history-heading">
+    <div class="dialog-heading">
+      <div>
+        <p class="eyebrow">THE READING JOURNAL</p>
+        <h2 id="history-heading">历史记录</h2>
+      </div>
+      <form method="dialog"><button class="close-button" type="submit" aria-label="关闭历史记录" autofocus>×</button></form>
+    </div>
+    <p class="preview-intro">按时间从新到旧排列。展开一条记录可回看问题和三张牌的解读。</p>
+    <p class="history-empty" id="history-empty">翻完三张牌后，本轮记录会出现在这里。</p>
+    <div class="history-list" id="history-list"></div>
+  </dialog>
+
+  <dialog class="artwork-dialog" id="artwork-dialog" aria-labelledby="artwork-heading" aria-describedby="artwork-direction">
+    <div class="artwork-frame">
+      <div class="artwork-heading">
+        <h2 id="artwork-heading"></h2>
+        <span class="orientation" id="artwork-direction"></span>
+        <form method="dialog"><button class="close-button" type="submit" aria-label="关闭放大牌面" autofocus>×</button></form>
+      </div>
+      <div id="artwork-image"></div>
+    </div>
+  </dialog>
+</body>
+</html>
