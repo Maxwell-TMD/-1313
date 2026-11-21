@@ -114,18 +114,19 @@ p, h1, h2, h3, figure { margin: 0; }
 }
 .card-art { display: block; position: relative; overflow: hidden; width: 100%; aspect-ratio: 2 / 3; border-radius: 5px; }
 .card-art img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.card-art.is-reversed img, .card-art.is-reversed .placeholder-face { transform: rotate(180deg); }
-.card-back { background: #17352a; box-shadow: 0 2px 5px #050e0b88; }
-.card-back::before, .card-back::after {
-  content: ""; position: absolute; inset: 0 0 50%;
-  background-image: url("art/card-back.png");
+.card-face { background-color: var(--paper); background-repeat: no-repeat; }
+.card-face.is-reversed { transform: rotate(180deg); }
+.card-face.show-preview::before {
+  content: ""; position: absolute; inset: 0;
+  background-position: var(--tile-x) center;
+  background-size: 600% 100%;
   background-repeat: no-repeat;
-  background-position: center top;
-  background-size: 100% 200%;
 }
-.card-back::after { inset: 50% 0 0; transform: rotate(180deg); }
-.placeholder-face { display: grid; place-items: center; width: 100%; height: 100%; background: var(--paper); color: var(--suit-color); border: 1px solid #aa8553; }
-.placeholder-face svg { width: 88%; height: 88%; }
+.card-face img { position: absolute; inset: 0; }
+.card-back {
+  background: #17352a url("art/previews/back.webp") center / 100% 100% no-repeat;
+  box-shadow: 0 2px 5px #050e0b88;
+}
 .deck-caption { text-align: center; margin-top: 13px; color: var(--muted); font-size: 12px; letter-spacing: .04em; }
 .deck-caption span { color: var(--gold); margin-right: 4px; }
 @keyframes reveal { from { transform: scaleX(.08); opacity: .55; } to { transform: scaleX(1); opacity: 1; } }
