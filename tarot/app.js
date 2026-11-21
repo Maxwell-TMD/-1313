@@ -22,14 +22,6 @@ const artworkHeading = document.querySelector("#artwork-heading");
 const artworkDirection = document.querySelector("#artwork-direction");
 const artworkImage = document.querySelector("#artwork-image");
 
-const suitSymbols = {
-  sun: '<path d="M40 35c0 10-6 17-16 17 10 0 16 7 16 17 0-10 6-17 16-17-10 0-16-7-16-17Z"/><circle cx="40" cy="52" r="3"/>',
-  wand: '<path d="M32 68c2-11 9-24 17-33m-8 12c-6 0-9-5-9-8 6 0 9 2 9 8Zm1 6c5-5 10-5 13-4-3 5-8 7-13 4Z"/>',
-  cup: '<path d="M28 41h24c0 10-5 16-12 16s-12-6-12-16Zm12 16v8m-7 0h14m-17-19h20"/>',
-  sword: '<path d="M40 34 44 44 42 59h-4l-2-15 4-10Zm-7 25h14m-7 0v9m-2 0h4"/>',
-  coin: '<circle cx="40" cy="52" r="13"/><path d="m40 43 5 15-12-9h14l-12 9Z"/>',
-};
-const rankMarks = { ace: "I", page: "P", knight: "N", queen: "Q", king: "K" };
 let round = [];
 let selectedCount = 0;
 
@@ -46,36 +38,37 @@ function createBack() {
   return back;
 }
 
-function createPlaceholder(card) {
-  const group = deckGroups[card.suit];
-  const rank = rankMarks[card.rank] ?? Number(card.rank);
-  const placeholder = makeElement("span", "placeholder-face");
-  placeholder.style.setProperty("--suit-color", group.color);
-  placeholder.innerHTML = `
-    <svg viewBox="0 0 80 108" fill="none" aria-hidden="true">
-      <g stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="4" y="4" width="72" height="100" rx="6"/>
-        <rect x="8" y="8" width="64" height="92" rx="4" opacity=".55"/>
-        <path d="M10 37c0-12 13-10 13-23m-13 23c4-10 12-8 17-17m43 17c0-12-13-10-13-23m13 23c-4-10-12-8-17-17M10 71c0 12 13 10 13 23m47-23c0 12-13 10-13 23"/>
-        <circle cx="40" cy="52" r="21"/>
-        <circle cx="40" cy="52" r="18" opacity=".5"/>
-        ${suitSymbols[group.mark]}
-      </g>
-      <text x="40" y="91" text-anchor="middle" fill="currentColor" font-family="Georgia, serif" font-size="14">${rank}</text>
-    </svg>`;
-  return placeholder;
-}
+// Upgrade only cards near the gallery's own scroll viewport.
+const galleryArtworkObserver = typeof IntersectionObserver === "function"
+  ? new IntersectionObserver((entries, observer) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        entry.target.classList.add("show-preview");
+        observer.unobserve(entry.target);
+      }
+    }, { root: previewDialog, rootMargin: "100px 0px" })
+  : null;
 
-function createFace(card, reversed, lazy = false) {
-  const face = makeElement("span", reversed ? "card-art is-reversed" : "card-art");
+function createFace(card, reversed, view = "preview") {
+  const face = makeElement("span", "card-art card-face");
+  face.dataset.card = card.id;
+  face.classList.toggle("is-reversed", reversed);
   face.setAttribute("aria-hidden", "true");
-  const image = document.createElement("img");
-  image.alt = "";
-  image.decoding = "async";
-  if (lazy) image.loading = "lazy";
-  image.addEventListener("error", () => image.replaceWith(createPlaceholder(card)), { once: true });
-  image.src = "art/titled/" + card.id + ".webp";
-  face.append(image);
+
+  if (view === "gallery" && galleryArtworkObserver) {
+    galleryArtworkObserver.observe(face);
+  } else {
+    face.classList.add("show-preview");
+  }
+
+  if (view === "zoom") {
+    const image = document.createElement("img");
+    image.alt = "";
+    image.decoding = "async";
+    image.addEventListener("error", () => image.remove(), { once: true });
+    image.src = "art/titled/" + card.id + ".webp";
+    face.append(image);
+  }
   return face;
 }
 
@@ -153,7 +146,7 @@ function createResult(entry, direction, topic) {
     artworkHeading.textContent = card.name;
     artworkDirection.textContent = direction;
     artworkDirection.classList.toggle("reverse", reversed);
-    artworkImage.replaceChildren(createFace(card, reversed));
+    artworkImage.replaceChildren(createFace(card, reversed, "zoom"));
     artworkDialog.showModal();
   });
   const heading = document.createElement("div");
@@ -255,7 +248,7 @@ function createGalleryGroup(name, cards) {
       const button = makeElement("button", "gallery-card");
       button.type = "button";
       button.setAttribute("aria-haspopup", "dialog");
-      button.append(createFace(card, false, true), makeElement("span", "gallery-caption", card.name));
+      button.append(createFace(card, false, "gallery"), makeElement("span", "gallery-caption", card.name));
       button.addEventListener("click", () => openCardMeaning(card));
       figure.append(button);
     } else {
