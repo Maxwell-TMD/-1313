@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <title>花庭秘仪 · 塔罗</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=20261121">
   <script src="deck.js" defer></script>
   <script src="interpretations.js" defer></script>
   <script src="records.js" defer></script>
-  <script src="app.js" defer></script>
+  <script src="app.js?v=20261121" defer></script>
 </head>
 <body>
   <header class="site-header">
@@ -24,7 +24,8 @@
       </a>
       <div class="site-actions">
         <span class="local-label"><span></span> 离线牌室</span>
-        <button class="secondary-button" id="preview-button" type="button">牌面图鉴</button>
+        <button class="secondary-button" id="preview-button" type="button" aria-haspopup="dialog">牌面图鉴</button>
+        <button class="secondary-button" id="meanings-button" type="button" aria-haspopup="dialog">牌面解读</button>
         <button class="secondary-button" id="history-button" type="button" aria-haspopup="dialog">历史记录</button>
       </div>
     </div>
@@ -136,8 +137,23 @@
       </div>
       <form method="dialog"><button class="close-button" type="submit" aria-label="关闭牌面图鉴" autofocus>×</button></form>
     </div>
-    <p class="preview-intro">按牌组查看 78 张牌的正面插画与通用牌背。</p>
+    <p class="preview-intro" id="gallery-intro"></p>
+    <label class="card-search" id="card-search-label" hidden>查找牌名或牌组
+      <input type="search" id="card-search" placeholder="例如 愚人、圣杯">
+    </label>
     <div id="preview-content"></div>
+    <p class="history-empty" id="card-search-empty" hidden>没有找到这张牌，试试其他牌名或牌组。</p>
+  </dialog>
+
+  <dialog class="preview-dialog card-definition" id="meaning-dialog" aria-labelledby="meaning-heading">
+    <div class="dialog-heading">
+      <div><p class="eyebrow" id="meaning-group"></p><h2 id="meaning-heading"></h2></div>
+      <form method="dialog"><button class="close-button" type="submit" aria-label="返回选牌" autofocus>×</button></form>
+    </div>
+    <div class="meaning-layout">
+      <div id="meaning-image"></div>
+      <div id="meaning-text"></div>
+    </div>
   </dialog>
 
   <dialog class="preview-dialog" id="history-dialog" aria-labelledby="history-heading">

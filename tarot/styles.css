@@ -242,7 +242,21 @@ html:has(.artwork-dialog[open]) { overflow: hidden; }
 .gallery-title { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; color: var(--gold); font: 600 16px/1.4 var(--serif); }
 .gallery-title::after { content: ""; flex: 1; height: 1px; background: #a582536f; }
 .preview-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
-.preview-grid figcaption { margin-top: 7px; text-align: center; font: 600 15px/1.4 var(--serif); }
+.preview-grid figcaption, .gallery-caption { display: block; margin-top: 7px; text-align: center; font: 600 15px/1.4 var(--serif); }
+.gallery-card { width: 100%; padding: 0; border: 0; border-radius: 5px; color: inherit; background: transparent; }
+.gallery-card:hover .gallery-caption { color: var(--gold); }
+.card-search { display: grid; gap: 4px; max-width: 24rem; margin-bottom: 16px; color: var(--muted); font-size: 14px; }
+.card-search input { width: 100%; min-height: 40px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 5px; color: var(--ink); background: #162922; font: inherit; }
+.card-definition { max-width: 760px; }
+.meaning-layout { display: grid; grid-template-columns: minmax(120px, 1fr) minmax(0, 2fr); gap: 18px; margin-top: 12px; }
+#meaning-text { display: grid; gap: 12px; }
+#meaning-text .meaning, #meaning-text .themed-text { font-size: 15px; }
+@media (max-width: 600px) {
+  .site-bar { flex-wrap: wrap; padding-block: 9px; }
+  .site-actions { flex-wrap: wrap; }
+  .meaning-layout { grid-template-columns: minmax(0, 1fr); }
+  #meaning-image { width: min(38%, 140px); margin-inline: auto; }
+}
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .noscript { margin-top: 10px; color: var(--gold); }
 
