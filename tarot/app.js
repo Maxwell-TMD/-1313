@@ -222,14 +222,45 @@ recordForm.elements.topic.addEventListener("change", (event) => {
   });
 });
 
+const meaningDialog = document.querySelector("#meaning-dialog");
+const cardSearch = document.querySelector("#card-search");
+const galleryContent = document.querySelector("#preview-content");
+
+function openCardMeaning(card) {
+  document.querySelector("#meaning-group").textContent = deckGroups[card.suit].label;
+  document.querySelector("#meaning-heading").textContent = card.name;
+  document.querySelector("#meaning-image").replaceChildren(createFace(card, false));
+  const sections = [false, true].map((reversed) => {
+    const direction = reversed ? "逆位" : "正位";
+    const meaning = reversed ? card.reversed : card.upright;
+    const section = makeElement("section", "reading-result");
+    const themed = createThemedReading(card, reversed, "自我成长");
+    themed.querySelector("select").setAttribute("aria-label", card.name + direction + "的解读主题");
+    section.append(makeElement("h3", "result-name", direction),
+      makeElement("p", "keywords", meaning.keywords), makeElement("p", "meaning", meaning.text), themed);
+    return section;
+  });
+  document.querySelector("#meaning-text").replaceChildren(...sections);
+  meaningDialog.showModal();
+  meaningDialog.scrollTop = 0;
+}
+
 function createGalleryGroup(name, cards) {
   const section = makeElement("section", "gallery-group");
+  section.dataset.group = name;
   const grid = makeElement("div", "preview-grid");
   const figures = cards.map((card) => {
     const figure = document.createElement("figure");
-    const caption = document.createElement("figcaption");
-    caption.textContent = card ? card.name : "通用牌背";
-    figure.append(card ? createFace(card, false, true) : createBack(), caption);
+    if (card) {
+      const button = makeElement("button", "gallery-card");
+      button.type = "button";
+      button.setAttribute("aria-haspopup", "dialog");
+      button.append(createFace(card, false, true), makeElement("span", "gallery-caption", card.name));
+      button.addEventListener("click", () => openCardMeaning(card));
+      figure.append(button);
+    } else {
+      figure.append(createBack(), makeElement("figcaption", "", "通用牌背"));
+    }
     return figure;
   });
   grid.append(...figures);
@@ -237,17 +268,44 @@ function createGalleryGroup(name, cards) {
   return section;
 }
 
-document.querySelector("#preview-button").addEventListener("click", () => {
-  const content = document.querySelector("#preview-content");
-  if (!content.firstChild) {
+function filterGallery() {
+  const query = cardSearch.value.trim();
+  let anyVisible = false;
+  for (const group of galleryContent.children) {
+    let matches = false;
+    for (const figure of group.querySelectorAll("figure")) {
+      figure.hidden = !(group.dataset.group + figure.textContent).includes(query);
+      if (!figure.hidden) matches = true;
+    }
+    group.hidden = !matches || (group.dataset.group === "牌背" && !cardSearch.closest("label").hidden);
+    if (!group.hidden) anyVisible = true;
+  }
+  document.querySelector("#card-search-empty").hidden = anyVisible;
+}
+
+function openGallery(showMeanings) {
+  if (!galleryContent.firstChild) {
     const groups = Object.entries(deckGroups).map(([suit, group]) =>
       createGalleryGroup(group.label, tarotDeck.filter((card) => card.suit === suit)),
     );
-    content.append(...groups, createGalleryGroup("牌背", [null]));
+    galleryContent.append(...groups, createGalleryGroup("牌背", [null]));
   }
+  document.querySelector("#preview-heading").textContent = showMeanings ? "牌面解读" : "牌面图鉴";
+  previewDialog.querySelector(".close-button").setAttribute("aria-label", showMeanings ? "关闭牌面解读" : "关闭牌面图鉴");
+  previewDialog.querySelector(".eyebrow").textContent = showMeanings ? "CARD MEANINGS" : "THE ART OF THE DECK";
+  document.querySelector("#gallery-intro").textContent = showMeanings
+    ? "选择一张牌，查看正逆位含义，再按爱情、事业等主题细读。"
+    : "按牌组浏览插画。点击任一正面牌，查看它的含义。";
+  document.querySelector("#card-search-label").hidden = !showMeanings;
+  cardSearch.value = "";
+  filterGallery();
   previewDialog.showModal();
   previewDialog.scrollTop = 0;
-});
+}
+
+cardSearch.addEventListener("input", filterGallery);
+document.querySelector("#preview-button").addEventListener("click", () => openGallery(false));
+document.querySelector("#meanings-button").addEventListener("click", () => openGallery(true));
 
 artworkDialog.addEventListener("click", (event) => {
   if (event.target === artworkDialog) artworkDialog.close();
